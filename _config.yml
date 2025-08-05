@@ -1,3 +1,6 @@
+---
+# prevents Jekyll from processing this page’s content
+---
 theme: jekyll-theme-midnight
 title: Welcome to Charan's home page
 description: Feel free to keep an eye on this page for upcoming projects.
