@@ -9,7 +9,7 @@
 
   body {
     margin: 0;
-    background: #fffaf4;
+    background: #fff8f2;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -21,25 +21,50 @@
 
   /* Fullscreen floral frame */
   .frame-border {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: url('frame.jpg') center/cover no-repeat;
-  z-index: 0;
-  pointer-events: none;
-	}
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('frame.jpg') center/cover no-repeat;
+    z-index: 0;
+    pointer-events: none;
+  }
 
-  /* Watermark */
+  /* Watermark with shimmering gold */
   .watermark {
     position: absolute;
     font-family: 'Great Vibes', cursive;
     font-size: 15vw;
-    color: rgba(212,175,55,0.1); /* faint gold */
+    background: linear-gradient(90deg, transparent, gold, transparent);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 5s linear infinite;
+    opacity: 0.15;
     z-index: 0;
     pointer-events: none;
     user-select: none;
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  /* Loader */
+  .loader {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border: 6px solid rgba(212,175,55,0.3);
+    border-top: 6px solid gold;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 20;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 
   /* Envelope */
@@ -56,6 +81,7 @@
     box-shadow: 0 5px 20px rgba(0,0,0,0.3);
     z-index: 5;
     transition: opacity 1s ease;
+    display: none;
   }
 
   .flap {
@@ -88,7 +114,6 @@
     height: 100%;
     object-fit: contain;
     border-radius: 5px;
-    display: none; /* Hidden until preloaded */
   }
 
   .envelope.open .flap {
@@ -108,12 +133,28 @@
     opacity: 0;
     transform: scale(0.95);
     transition: opacity 1s ease, transform 3s ease;
+    filter: drop-shadow(0 0 15px rgba(0,0,0,0.3));
   }
 
   .invite-fullscreen.show {
     opacity: 1;
     transform: scale(1); /* subtle zoom-in */
   }
+
+  /* Subtle vignette */
+  .vignette {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(0,0,0,0) 70%, rgba(0,0,0,0.3) 100%);
+    opacity: 0;
+    transition: opacity 2s ease;
+    z-index: 9;
+  }
+  .vignette.show { opacity: 1; }
 
   /* Sparkles */
   .sparkle {
@@ -156,6 +197,8 @@
 <body>
   <div class="frame-border"></div>
   <div class="watermark">A & S</div>
+  <div class="vignette"></div>
+  <div class="loader"></div>
 
   <div class="envelope" onclick="openEnvelope()">
     <div class="flap"></div>
@@ -171,25 +214,40 @@
   const invite = document.getElementById('inviteImage');
   const fullscreenInvite = document.getElementById('inviteFullscreen');
   const envelope = document.querySelector('.envelope');
+  const loader = document.querySelector('.loader');
+  const vignette = document.querySelector('.vignette');
 
   // Preload image
   const img = new Image();
   img.src = invite.src;
   img.onload = () => {
-    invite.style.display = 'block'; // only show when loaded
+    loader.style.display = 'none';
+    envelope.style.display = 'block'; // show envelope only after loaded
+    setTimeout(openEnvelope, 2000); // auto-open after 1s
   };
 
   function openEnvelope() {
     envelope.classList.add('open');
 
+    // Petal burst
+    for(let i=0; i<20; i++) {
+      const burst = document.createElement('div');
+      burst.classList.add('petal');
+      burst.style.left = '50%';
+      burst.style.top = '50%';
+      burst.style.background = 'gold';
+      burst.style.animationDuration = (1+Math.random()*2)+'s';
+      burst.style.transform = `rotate(${Math.random()*360}deg)`;
+      document.body.appendChild(burst);
+      setTimeout(()=>burst.remove(),3000);
+    }
+
     setTimeout(() => {
       envelope.style.opacity = '0';
       fullscreenInvite.classList.add('show');
-    }, 1500);
+      vignette.classList.add('show');
+    }, 2000);
   }
-
-  // Auto open after 1.5 seconds
-  setTimeout(openEnvelope, 1500);
 
   // Create golden sparkles
   for(let i=0; i<25; i++) {
